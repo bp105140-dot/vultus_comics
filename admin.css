@@ -1,0 +1,357 @@
+/* =========================================
+   VULTUS ADMIN UI - NOIR EDITION (ATUALIZADO)
+   ========================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Rajdhani:wght@500;700&display=swap");
+
+:root {
+  --bg-dark: #000000;
+  --bg-panel: #0a0a0a;
+  --primary: #ffffff;
+  --text-muted: #888888;
+  --border: #333333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--primary);
+  font-family: "Rajdhani", sans-serif;
+  font-size: 16px;
+}
+
+/* Layout e Sidebar */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+.admin-sidebar {
+  width: 260px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+.admin-logo h2 {
+  font-family: "Oswald", sans-serif;
+  text-transform: uppercase;
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 10px;
+  margin-bottom: 40px;
+}
+.admin-nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 18px;
+  padding: 15px 0;
+  border-bottom: 1px solid #222;
+  display: block;
+  transition: 0.3s;
+}
+.admin-nav a:hover,
+.admin-nav a.active {
+  color: var(--primary);
+  padding-left: 10px;
+  border-color: var(--primary);
+}
+
+/* Conteúdo */
+.admin-content {
+  flex: 1;
+  padding: 40px;
+  background: linear-gradient(to bottom, #111, #000);
+}
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+}
+.admin-header h1 {
+  font-family: "Oswald", sans-serif;
+  font-size: 32px;
+  text-transform: uppercase;
+}
+
+/* Botões */
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+button {
+  font-family: "Oswald", sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #000;
+  border: 1px solid #fff;
+  padding: 10px 20px;
+  font-weight: bold;
+}
+.btn-primary:hover {
+  background: #000;
+  color: #fff;
+}
+.btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 10px 20px;
+}
+.btn-secondary:hover {
+  border-color: #fff;
+}
+
+/* Tabela */
+.products-table-container {
+  background: #050505;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.products-table th {
+  background: #151515;
+  padding: 15px;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #888;
+}
+.products-table td {
+  padding: 15px;
+  border-bottom: 1px solid #222;
+  vertical-align: middle;
+}
+.table-media {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border: 1px solid #333;
+}
+.btn-action {
+  background: #000;
+  border: 1px solid #333;
+  color: #aaa;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+.btn-action:hover {
+  color: #fff;
+  border-color: #fff;
+}
+.btn-action.delete:hover {
+  border-color: red;
+  color: red;
+}
+
+/* =======================================================
+   CORREÇÃO DO MODAL (SCROLL E TAMANHO)
+   ======================================================= */
+.modal,
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px; /* Espaço para não colar na borda */
+}
+
+.modal-content {
+  background: #0a0a0a;
+  border: 1px solid #fff;
+  padding: 30px;
+  width: 600px;
+  max-width: 100%;
+
+  /* AQUI ESTÁ A CORREÇÃO DO BOTÃO SUMINDO */
+  max-height: 90vh; /* Altura máxima de 90% da tela */
+  overflow-y: auto; /* Cria barra de rolagem se for maior */
+
+  box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+/* Custom Scrollbar do Modal */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: #000;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+/* Formulário */
+.form-group {
+  margin-bottom: 20px;
+}
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+.form-row .form-group {
+  flex: 1;
+}
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #fff;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  padding: 12px;
+  color: #fff;
+  font-family: "Rajdhani", sans-serif;
+}
+input:focus {
+  border-color: #fff;
+  outline: none;
+}
+
+/* ÁREA DE UPLOAD (NOVA) */
+.media-upload-area {
+  border: 2px dashed #333;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 15px;
+  transition: 0.3s;
+  background: #080808;
+}
+.media-upload-area:hover {
+  border-color: #fff;
+  background: #111;
+}
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+  font-family: "Oswald", sans-serif;
+  text-transform: uppercase;
+}
+
+input[type="file"] {
+  display: none;
+} /* Esconde o input feio original */
+
+/* PREVIEW DAS IMAGENS */
+.media-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.preview-item {
+  position: relative;
+  height: 80px;
+  border: 1px solid #333;
+  background: #000;
+}
+
+.preview-item img,
+.preview-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-media-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: red;
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Toast e Confirm */
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+}
+.vultus-toast {
+  background: #fff;
+  color: #000;
+  padding: 15px 25px;
+  margin-bottom: 10px;
+  border-left: 5px solid #000;
+  font-weight: bold;
+  animation: slideIn 0.3s;
+}
+.confirm-box {
+  background: #000;
+  border: 1px solid #fff;
+  padding: 30px;
+  text-align: center;
+}
+.btn-confirm-yes {
+  background: #fff;
+  color: #000;
+  padding: 10px 20px;
+  border: none;
+  font-weight: bold;
+  margin-left: 10px;
+}
+.btn-confirm-no {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 10px 20px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

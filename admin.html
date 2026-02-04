@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Painel administrativo Vultus - Gestão completa de produtos"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Vultus Admin | Gestão Completa</title>
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <!-- Toast Container -->
+    <div
+      id="toast-container"
+      class="toast-container"
+      role="alert"
+      aria-live="polite"
+    ></div>
+
+    <div class="admin-container">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-logo">
+          <h2>VULTUS<span>ADMIN</span></h2>
+        </div>
+
+        <nav class="admin-nav">
+          <a href="#" class="active" onclick="location.reload()">Produtos</a>
+          <a href="#" onclick="manageCategories()">Segmentos</a>
+          <a href="index.html" target="_blank" style="margin-top: auto"
+            >Ver Loja ↗</a
+          >
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-content">
+        <header class="admin-header">
+          <h1>Gestão de Produtos</h1>
+          <div class="header-buttons">
+            <button onclick="manageCategories()" class="btn-secondary">
+              Segmentos
+            </button>
+            <button id="btnNewProduct" class="btn-primary">
+              + Novo Produto
+            </button>
+          </div>
+        </header>
+
+        <div class="products-table-container">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>Mídia</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="adminProductsList"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+      <div class="modal-content" style="max-width: 800px">
+        <span
+          class="close-modal"
+          style="float: right; cursor: pointer; font-size: 24px"
+          >&times;</span
+        >
+        <h2 id="modalTitle">Novo Produto</h2>
+
+        <form id="productForm">
+          <input type="hidden" id="prodId" />
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 2">
+              <label>Nome do Produto</label>
+              <input
+                type="text"
+                id="prodName"
+                required
+                placeholder="Ex: Camiseta Vultus X"
+              />
+            </div>
+            <div class="form-group">
+              <label>Categoria</label>
+              <select id="prodCategory" required></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Preço Atual (R$)</label>
+              <input type="number" id="prodPrice" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label>Preço Antigo (De)</label>
+              <input type="number" id="prodOldPrice" step="0.01" />
+            </div>
+            <div class="form-group">
+              <label>Etiqueta</label>
+              <select id="prodTag">
+                <option value="">Nenhuma</option>
+                <option value="NOVO">NOVO</option>
+                <option value="OFERTA">OFERTA</option>
+                <option value="ESGOTADO">ESGOTADO</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Descrição Detalhada</label>
+            <textarea
+              id="prodDesc"
+              rows="4"
+              placeholder="Conte a história do produto, detalhes do design..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Características (Ficha Técnica)</label>
+            <textarea
+              id="prodSpecs"
+              rows="3"
+              placeholder="Ex: Algodão 100%, Estampa Silk Digital, Modelagem Oversized..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Galeria (Fotos e Vídeos)</label>
+            <div class="media-upload-area">
+              <label for="mediaInput" class="custom-file-upload"
+                >📁 Escolher Arquivos</label
+              >
+              <input
+                type="file"
+                id="mediaInput"
+                multiple
+                accept="image/*,video/*"
+              />
+              <p style="margin-top: 10px; font-size: 12px; color: #666">
+                A primeira imagem será a capa.
+              </p>
+            </div>
+            <div id="previewContainer" class="media-preview-grid"></div>
+          </div>
+
+          <div class="form-actions" style="margin-top: 30px; text-align: right">
+            <button type="button" class="btn-secondary close-modal-btn">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary">Salvar Produto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="modal">
+      <div class="modal-content" style="width: 400px">
+        <span
+          class="close-modal"
+          onclick="closeCategoryModal()"
+          style="float: right; cursor: pointer"
+          >&times;</span
+        >
+        <h2>Segmentos</h2>
+        <form id="categoryForm">
+          <textarea
+            id="catInput"
+            rows="5"
+            placeholder="Separe por vírgula..."
+          ></textarea>
+          <div style="margin-top: 20px; text-align: right">
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="closeCategoryModal()"
+            >
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

@@ -26,8 +26,7 @@
   --danger: #ff3b3b;
 
   /* Typography */
-  --font-primary:
-    "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-primary: "Rajdhani", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: "Oswald", sans-serif;
 
   /* Spacing */
@@ -159,9 +158,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  transition:
-    opacity 0.5s,
-    visibility 0.5s;
+  transition: opacity 0.5s, visibility 0.5s;
 }
 
 .loading-screen.fade-out {
@@ -368,8 +365,7 @@ button:disabled {
 }
 
 @keyframes pulse {
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
   }
   50% {
@@ -428,28 +424,28 @@ button:disabled {
   width: 80%;
 }
 
-/* ============= HERO SECTION ============= */
-/* vultus_comics/style.css */
-
+/* ============= HERO SECTION (BANNER) ============= */
 .hero-section {
-  height: clamp(500px, 80vh, 850px);
+  /* Aumentei a altura mínima para garantir impacto visual e ver os personagens */
+  height: clamp(600px, 90vh, 950px); 
 
   background:
     linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0.95) 0%,
-      rgba(0, 0, 0, 0.7) 40%,
-      rgba(0, 0, 0, 0.3) 70%,
-      transparent 100%
+      to bottom, /* Mudado para bottom para escurecer os pés/texto */
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.0) 50%,
+      rgba(0, 0, 0, 0.8) 100%
     ),
     url("img/PERSONAGENS.png");
 
   background-size: cover;
-
-  background-position: center top;
+  
+  /* CRUCIAL: Alinha pelo TOPO e CENTRO. */
+  background-position: top center; 
 
   display: flex;
   align-items: center;
+  justify-content: center; /* Centraliza no eixo horizontal */
   border-bottom: 2px solid var(--primary);
   position: relative;
   overflow: hidden;
@@ -843,8 +839,7 @@ button:disabled {
 }
 
 @keyframes skeleton-loading {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
   50% {
@@ -925,26 +920,24 @@ button:disabled {
   margin-bottom: var(--space-md);
 }
 
-/* No arquivo style.css, substitua ou atualize estas classes */
-
 .main-media-container {
   width: 100%;
   aspect-ratio: 3/4;
-  background: var(--bg-dark); /* Fundo preto para preencher espaços vazios */
+  background: var(--bg-dark);
   border: 1px solid var(--border);
-  display: flex; /* FLEXBOX para centralizar */
-  align-items: center; /* Centraliza verticalmente */
-  justify-content: center; /* Centraliza horizontalmente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   position: relative;
 }
 
 .main-image {
-  width: auto; /* Deixa a largura automática */
-  height: auto; /* Deixa a altura automática */
-  max-width: 100%; /* Limite máximo largura */
-  max-height: 100%; /* Limite máximo altura */
-  object-fit: contain; /* Garante que a imagem inteira apareça */
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   display: block;
 }
 
@@ -1533,6 +1526,22 @@ button:disabled {
   opacity: 1;
 }
 
+/* NOVO: Botão de Acesso Admin no Footer */
+#btnAdminAccess {
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  margin-right: 10px;
+  transition: color var(--transition-base);
+}
+
+#btnAdminAccess:hover {
+  color: var(--text-muted);
+}
+
 /* ============= RESPONSIVE DESIGN ============= */
 
 /* Tablets (768px - 1024px) */
@@ -1599,13 +1608,17 @@ button:disabled {
     border-bottom: 1px solid var(--border);
   }
 
+  /* AJUSTE MOBILE DO BANNER */
   .hero-section {
-    height: clamp(350px, 50vh, 450px);
-    background-position: 70% center;
+    height: 80vh; /* Altura confortável para mobile */
+    background-position: top center; /* Garante que as cabeças apareçam */
+    background-attachment: scroll; /* Evita problemas de scroll no iPhone */
   }
 
   .hero-content {
     padding: 0 var(--space-md);
+    margin-top: 40vh; /* Empurra o texto para baixo para não tapar rostos */
+    text-align: center;
   }
 
   .benefits-bar {

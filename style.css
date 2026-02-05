@@ -426,12 +426,12 @@ button:disabled {
 
 /* ============= HERO SECTION (BANNER) ============= */
 .hero-section {
-  /* Aumentei a altura mínima para garantir impacto visual e ver os personagens */
-  height: clamp(600px, 90vh, 950px); 
+  /* AJUSTE: Diminuímos um pouco a altura (de 90vh para 85vh e max 900px) */
+  height: clamp(550px, 85vh, 900px); 
 
   background:
     linear-gradient(
-      to bottom, /* Mudado para bottom para escurecer os pés/texto */
+      to bottom, 
       rgba(0, 0, 0, 0.3) 0%,
       rgba(0, 0, 0, 0.0) 50%,
       rgba(0, 0, 0, 0.8) 100%
@@ -440,12 +440,12 @@ button:disabled {
 
   background-size: cover;
   
-  /* CRUCIAL: Alinha pelo TOPO e CENTRO. */
+  /* Mantemos alinhado pelo topo para não cortar cabeças */
   background-position: top center; 
 
   display: flex;
   align-items: center;
-  justify-content: center; /* Centraliza no eixo horizontal */
+  justify-content: center;
   border-bottom: 2px solid var(--primary);
   position: relative;
   overflow: hidden;
@@ -1610,14 +1610,14 @@ button:disabled {
 
   /* AJUSTE MOBILE DO BANNER */
   .hero-section {
-    height: 80vh; /* Altura confortável para mobile */
-    background-position: top center; /* Garante que as cabeças apareçam */
-    background-attachment: scroll; /* Evita problemas de scroll no iPhone */
+    height: 75vh; /* REDUZIDO de 80vh para 75vh (Um dedinho a menos) */
+    background-position: top center; 
+    background-attachment: scroll; 
   }
 
   .hero-content {
     padding: 0 var(--space-md);
-    margin-top: 40vh; /* Empurra o texto para baixo para não tapar rostos */
+    margin-top: 40vh; 
     text-align: center;
   }
 

@@ -13,7 +13,6 @@
     />
     <meta name="theme-color" content="#000000" />
 
-    <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Vultus Store - Streetwear Premium" />
     <meta
@@ -24,20 +23,16 @@
 
     <title>Vultus Store | Streetwear Premium</title>
 
-    <!-- Preload Critical Assets -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Fonts -->
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css" />
 
-    <!-- Favicon -->
     <link
       rel="icon"
       type="image/png"
@@ -45,7 +40,6 @@
     />
   </head>
   <body>
-    <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
       <div class="loading-logo">
         <span>VULTUS</span>
@@ -53,7 +47,6 @@
       </div>
     </div>
 
-    <!-- Toast Container -->
     <div
       id="toast-container"
       class="toast-container"
@@ -61,10 +54,8 @@
       aria-live="polite"
     ></div>
 
-    <!-- Header -->
     <header class="header-container" id="mainHeader">
       <div class="header-content">
-        <!-- Logo -->
         <a
           href="#"
           class="header-logo"
@@ -73,7 +64,6 @@
           <img src="img/LOGO.png" alt="Vultus Store Logo" loading="eager" />
         </a>
 
-        <!-- Mobile Menu Toggle -->
         <button
           class="mobile-menu-toggle"
           id="mobileMenuToggle"
@@ -85,7 +75,6 @@
           <span class="hamburger-line"></span>
         </button>
 
-        <!-- Cart Icon -->
         <div
           class="cart-icon-wrapper"
           onclick="openCart()"
@@ -110,7 +99,6 @@
         </div>
       </div>
 
-      <!-- Navigation Menu -->
       <nav class="nav-container" id="mainNav">
         <ul class="nav-list" id="dynamicMenu">
           <li>
@@ -120,7 +108,6 @@
       </nav>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero-section" aria-label="Banner Principal">
       <div class="hero-overlay"></div>
       <div class="hero-content">
@@ -142,7 +129,6 @@
       </div>
     </section>
 
-    <!-- Main Content -->
     <main class="main-content" id="produtos">
       <div class="section-header">
         <h2 class="section-title">Nossa Coleção</h2>
@@ -161,12 +147,8 @@
         </div>
       </div>
 
-      <!-- Products Grid -->
-      <div class="products-grid" id="productsGrid" role="list">
-        <!-- Products will be dynamically loaded here -->
-      </div>
+      <div class="products-grid" id="productsGrid" role="list"></div>
 
-      <!-- Empty State -->
       <div class="empty-state" id="emptyState" style="display: none">
         <svg
           width="80"
@@ -183,7 +165,6 @@
         <p>Tente ajustar os filtros ou explore outras categorias</p>
       </div>
 
-      <!-- Loading Skeleton -->
       <div class="products-skeleton" id="productsSkeleton">
         <div class="skeleton-card"></div>
         <div class="skeleton-card"></div>
@@ -192,7 +173,6 @@
       </div>
     </main>
 
-    <!-- Benefits Bar -->
     <section class="benefits-bar" aria-label="Benefícios">
       <div class="benefit-item">
         <div class="benefit-icon">
@@ -282,7 +262,6 @@
       </div>
     </section>
 
-    <!-- Product Detail Modal -->
     <div
       class="product-detail-modal"
       id="productDetailModal"
@@ -309,7 +288,6 @@
           </svg>
         </button>
 
-        <!-- Product Gallery -->
         <div class="detail-gallery">
           <div class="main-media-wrapper">
             <div id="mainMediaContainer" class="main-media-container"></div>
@@ -349,7 +327,6 @@
           <div id="thumbsList" class="thumbs-list"></div>
         </div>
 
-        <!-- Product Info -->
         <div class="detail-info">
           <span class="detail-category" id="detailCat">CATEGORIA</span>
           <h2 class="detail-name" id="detailName">Nome do Produto</h2>
@@ -375,12 +352,12 @@
 
           <div class="size-selector" id="sizeSelector" style="display: none">
             <h3 class="info-title">Selecione o Tamanho</h3>
-            <div class="size-options">
-              <button class="size-option" data-size="P">P</button>
-              <button class="size-option" data-size="M">M</button>
-              <button class="size-option" data-size="G">G</button>
-              <button class="size-option" data-size="GG">GG</button>
-            </div>
+            <div class="size-options"></div>
+          </div>
+
+          <div class="size-selector" id="colorSelector" style="display: none">
+            <h3 class="info-title">Selecione a Cor</h3>
+            <div class="size-options"></div>
           </div>
 
           <button class="btn-add-cart-large" id="btnDetailAdd">
@@ -436,7 +413,6 @@
       </div>
     </div>
 
-    <!-- Cart Modal -->
     <div class="cart-modal" id="cartModal">
       <div class="cart-overlay" onclick="closeCart()"></div>
       <div class="cart-sidebar">
@@ -460,9 +436,7 @@
           </button>
         </div>
 
-        <div class="cart-items" id="cartItems">
-          <!-- Cart items will be dynamically loaded -->
-        </div>
+        <div class="cart-items" id="cartItems"></div>
 
         <div class="cart-footer">
           <div class="cart-total">
@@ -484,7 +458,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer-section">
       <div class="footer-content">
         <div class="footer-column">
@@ -595,6 +568,35 @@
 
       <div class="footer-bottom">
         <p>&copy; 2026 Vultus Store. Todos os direitos reservados.</p>
+
+        <button id="btnAdminAccess" aria-label="Área Administrativa">
+          🔒 Área Restrita
+        </button>
+
+        <div id="adminModal" class="admin-modal">
+          <div class="admin-modal-content">
+            <h3>Área Restrita</h3>
+            <p>Acesso exclusivo para administradores</p>
+
+            <input
+              type="password"
+              id="adminPassInput"
+              class="admin-input"
+              placeholder="SENHA"
+              autofocus
+            />
+
+            <div class="admin-actions">
+              <button id="btnCancelAdmin" class="btn-admin-cancel">
+                Cancelar
+              </button>
+              <button id="btnConfirmAdmin" class="btn-admin-confirm">
+                Entrar
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="payment-methods">
           <span>Pagamento seguro:</span>
           <img
@@ -613,7 +615,6 @@
       </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="script.js"></script>
   </body>
 </html>

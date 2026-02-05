@@ -1,5 +1,5 @@
 // ==========================================
-// VULTUS ADMIN JS - COM DESCRIÇÕES
+// VULTUS ADMIN JS - COM GESTÃO DE TAMANHOS E CORES
 // ==========================================
 
 // --- UI HELPERS ---
@@ -157,6 +157,14 @@ window.editProduct = (id) => {
   document.getElementById("prodDesc").value = p.description || "";
   document.getElementById("prodSpecs").value = p.specs || "";
 
+  // NOVO: Carrega Tamanhos e Cores (converte array para texto)
+  document.getElementById("prodSizes").value = p.sizes
+    ? p.sizes.join(", ")
+    : "";
+  document.getElementById("prodColors").value = p.colors
+    ? p.colors.join(", ")
+    : "";
+
   currentMediaFiles = p.media || [];
   renderPreviews();
   loadCategories();
@@ -173,6 +181,23 @@ document.getElementById("productForm").addEventListener("submit", (e) => {
   const id = document.getElementById("prodId").value;
   const isEdit = id !== "";
 
+  // Processa Tamanhos e Cores
+  const sizesInput = document.getElementById("prodSizes").value;
+  const sizesList = sizesInput
+    ? sizesInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s !== "")
+    : [];
+
+  const colorsInput = document.getElementById("prodColors").value;
+  const colorsList = colorsInput
+    ? colorsInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s !== "")
+    : [];
+
   const newProd = {
     id: isEdit ? parseInt(id) : Date.now(),
     name: document.getElementById("prodName").value,
@@ -181,8 +206,10 @@ document.getElementById("productForm").addEventListener("submit", (e) => {
     price: parseFloat(document.getElementById("prodPrice").value),
     originalPrice:
       parseFloat(document.getElementById("prodOldPrice").value) || 0,
-    description: document.getElementById("prodDesc").value, // Salva Descrição
-    specs: document.getElementById("prodSpecs").value, // Salva Specs
+    description: document.getElementById("prodDesc").value,
+    specs: document.getElementById("prodSpecs").value,
+    sizes: sizesList, // <--- Salva lista de tamanhos
+    colors: colorsList, // <--- Salva lista de cores
     media: currentMediaFiles,
   };
 

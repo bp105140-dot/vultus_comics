@@ -429,8 +429,11 @@ button:disabled {
 }
 
 /* ============= HERO SECTION ============= */
+/* vultus_comics/style.css */
+
 .hero-section {
-  height: clamp(400px, 60vh, 600px);
+  height: clamp(500px, 80vh, 850px);
+
   background:
     linear-gradient(
       to right,
@@ -440,8 +443,11 @@ button:disabled {
       transparent 100%
     ),
     url("img/PERSONAGENS.png");
+
   background-size: cover;
-  background-position: center right;
+
+  background-position: center top;
+
   display: flex;
   align-items: center;
   border-bottom: 2px solid var(--primary);
@@ -637,8 +643,8 @@ button:disabled {
 /* ============= PRODUCTS GRID ============= */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-md);
   margin-bottom: var(--space-2xl);
 }
 
@@ -676,6 +682,11 @@ button:disabled {
   border-color: var(--border-light);
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
+}
+
+.product-image-container,
+.product-info-area {
+  cursor: pointer;
 }
 
 .product-tag {
@@ -746,6 +757,7 @@ button:disabled {
   align-items: center;
   gap: var(--space-sm);
   flex-wrap: wrap;
+  margin-bottom: var(--space-sm);
 }
 
 .old-price {
@@ -755,10 +767,37 @@ button:disabled {
 }
 
 .current-price {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 800;
   color: var(--primary);
   font-family: var(--font-display);
+}
+
+/* Botão adicionar ao carrinho no card */
+.btn-add-to-cart {
+  width: 100%;
+  padding: var(--space-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+.btn-add-to-cart:hover {
+  background: var(--primary);
+  color: var(--bg-dark);
+  border-color: var(--primary);
+  transform: translateY(-2px);
 }
 
 /* Empty State */
@@ -833,15 +872,15 @@ button:disabled {
 
 .detail-container {
   width: 100%;
-  max-width: 1100px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-width: 1000px;
+  max-height: 85vh;
+  overflow: hidden;
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: var(--space-2xl);
-  padding: var(--space-2xl);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
   position: relative;
   box-shadow: var(--shadow-lg);
   z-index: 1;
@@ -886,21 +925,27 @@ button:disabled {
   margin-bottom: var(--space-md);
 }
 
+/* No arquivo style.css, substitua ou atualize estas classes */
+
 .main-media-container {
   width: 100%;
   aspect-ratio: 3/4;
-  background: var(--bg-dark);
+  background: var(--bg-dark); /* Fundo preto para preencher espaços vazios */
   border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; /* FLEXBOX para centralizar */
+  align-items: center; /* Centraliza verticalmente */
+  justify-content: center; /* Centraliza horizontalmente */
   overflow: hidden;
+  position: relative;
 }
 
 .main-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  width: auto; /* Deixa a largura automática */
+  height: auto; /* Deixa a altura automática */
+  max-width: 100%; /* Limite máximo largura */
+  max-height: 100%; /* Limite máximo altura */
+  object-fit: contain; /* Garante que a imagem inteira apareça */
+  display: block;
 }
 
 .gallery-nav {
@@ -909,24 +954,22 @@ button:disabled {
   transform: translateY(-50%);
   width: 40px;
   height: 40px;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-base);
-  opacity: 0;
-}
-
-.main-media-wrapper:hover .gallery-nav {
   opacity: 1;
+  z-index: 10;
 }
 
 .gallery-nav:hover {
   background: var(--primary);
   border-color: var(--primary);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .gallery-nav:hover svg {
@@ -970,7 +1013,23 @@ button:disabled {
 .detail-info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md);
+  overflow-y: auto;
+  padding-right: var(--space-sm);
+  max-height: 100%;
+}
+
+.detail-info::-webkit-scrollbar {
+  width: 4px;
+}
+
+.detail-info::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+.detail-info::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 2px;
 }
 
 .detail-category {
@@ -983,7 +1042,7 @@ button:disabled {
 
 .detail-name {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
   line-height: 1.2;
   text-transform: uppercase;
   font-weight: 700;
@@ -994,18 +1053,18 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
   border-bottom: 1px solid var(--border);
 }
 
 .detail-price {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   font-family: var(--font-display);
 }
 
 .detail-old-price {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: var(--text-muted);
   text-decoration: line-through;
 }
@@ -1069,12 +1128,12 @@ button:disabled {
 /* Add to Cart Button */
 .btn-add-cart-large {
   width: 100%;
-  padding: var(--space-lg);
+  padding: var(--space-md);
   background: var(--primary);
   color: var(--bg-dark);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.125rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: none;
@@ -1484,7 +1543,7 @@ button:disabled {
   }
 
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--space-md);
   }
 
@@ -1558,6 +1617,11 @@ button:disabled {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-sm);
+  }
+
+  .btn-add-to-cart {
+    font-size: 0.7rem;
+    padding: var(--space-xs);
   }
 
   .detail-container {

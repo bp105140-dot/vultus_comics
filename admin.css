@@ -38,7 +38,7 @@ body {
   display: flex;
   flex-direction: column;
 }
-.admin-logo h2 {
+/* .admin-logo h2 {
   font-family: "Oswald", sans-serif;
   text-transform: uppercase;
   font-size: 28px;
@@ -47,6 +47,20 @@ body {
   border-bottom: 2px solid var(--primary);
   padding-bottom: 10px;
   margin-bottom: 40px;
+} */
+
+.admin-logo {
+  margin-bottom: 40px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary); /* Mantém a linha estilizada por baixo */
+}
+
+.admin-logo-img {
+  width: 100%; /* Faz a imagem ocupar a largura da sidebar */
+  max-width: 200px; /* Limita o tamanho máximo */
+  height: auto;
+  display: block;
+  /* filter: brightness(0) invert(1); Opcional: Garante que a logo fique branca se o PNG for preto */
 }
 .admin-nav a {
   color: var(--text-muted);

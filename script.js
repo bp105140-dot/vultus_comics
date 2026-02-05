@@ -27,7 +27,7 @@ const CONFIG = {
 const State = {
   products: [],
   categories: ["Geral"],
-  cart: [],
+  cart: [], // Agora armazenará apenas IDs (ex: [123, 456])
   currentFilter: "all",
   currentSort: "default",
   currentProduct: null,
@@ -47,7 +47,14 @@ const State = {
   },
 
   saveCart() {
-    localStorage.setItem(CONFIG.storageKeys.cart, JSON.stringify(this.cart));
+    try {
+      localStorage.setItem(CONFIG.storageKeys.cart, JSON.stringify(this.cart));
+    } catch (e) {
+      console.error("Erro ao salvar carrinho:", e);
+      alert(
+        "A memória do navegador está cheia. Tente limpar alguns produtos antigos.",
+      );
+    }
   },
 };
 
@@ -186,7 +193,14 @@ const UI = {
     let html = "";
     let total = 0;
 
-    State.cart.forEach((item, index) => {
+    // AQUI ESTÁ A MÁGICA: Usamos o ID salvo no carrinho para buscar
+    // o produto completo na lista de produtos (State.products)
+    State.cart.forEach((cartItemId, index) => {
+      const item = State.products.find((p) => p.id === cartItemId);
+
+      // Se por acaso o produto foi deletado da loja, ignoramos
+      if (!item) return;
+
       total += parseFloat(item.price);
       const thumbnail = item.media && item.media[0] ? item.media[0].data : "";
 
@@ -266,6 +280,14 @@ const Navigation = {
     }
 
     Products.render();
+
+    // Scroll para a seção de produtos
+    const productsSection = document.getElementById("produtos");
+    if (productsSection) {
+      setTimeout(() => {
+        productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
   },
 
   toggleMobileMenu() {
@@ -434,14 +456,49 @@ const Products = {
     card.innerHTML = `
       ${product.tag ? `<span class="product-tag">${Utils.sanitizeHTML(product.tag)}</span>` : ""}
       ${mediaHtml}
-      <h3 class="product-name">${Utils.sanitizeHTML(product.name)}</h3>
-      <div class="price-box">
-        ${product.originalPrice ? `<span class="old-price">R$ ${Utils.formatPrice(product.originalPrice)}</span>` : ""}
-        <span class="current-price">R$ ${Utils.formatPrice(product.price)}</span>
+      <div class="product-info-area">
+        <h3 class="product-name">${Utils.sanitizeHTML(product.name)}</h3>
+        <div class="price-box">
+          ${product.originalPrice ? `<span class="old-price">R$ ${Utils.formatPrice(product.originalPrice)}</span>` : ""}
+          <span class="current-price">R$ ${Utils.formatPrice(product.price)}</span>
+        </div>
       </div>
+      <button class="btn-add-to-cart" data-product-id="${product.id}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 2L9 6M15 2L15 6M6 6H18C19.1046 6 20 6.89543 20 8V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V8C4 6.89543 4.89543 6 6 6Z"/>
+        </svg>
+        Adicionar
+      </button>
     `;
 
-    card.addEventListener("click", () => ProductDetail.open(product.id));
+    // Event listeners
+    const imageContainer = card.querySelector(".product-image-container");
+    const infoArea = card.querySelector(".product-info-area");
+    const addBtn = card.querySelector(".btn-add-to-cart");
+
+    // Abrir detalhes ao clicar na imagem ou info
+    if (imageContainer) {
+      imageContainer.addEventListener("click", (e) => {
+        e.stopPropagation();
+        ProductDetail.open(product.id);
+      });
+    }
+
+    if (infoArea) {
+      infoArea.addEventListener("click", (e) => {
+        e.stopPropagation();
+        ProductDetail.open(product.id);
+      });
+    }
+
+    // Adicionar ao carrinho
+    if (addBtn) {
+      addBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        Cart.addItem(product.id);
+        openCart();
+      });
+    }
 
     return card;
   },
@@ -540,9 +597,11 @@ const ProductDetail = {
 
     // Setup add to cart button
     if (DOM.btnDetailAdd) {
-      DOM.btnDetailAdd.onclick = () => {
+      DOM.btnDetailAdd.onclick = (e) => {
+        e.preventDefault();
         Cart.addItem(product.id);
         this.close();
+        openCart();
       };
     }
   },
@@ -594,13 +653,13 @@ const ProductDetail = {
 
     if (mediaItem.type === "video") {
       DOM.mainMediaContainer.innerHTML = `
-        <video src="${mediaItem.data}" class="main-image" autoplay muted loop controls>
+        <video src="${mediaItem.data}" class="main-image" autoplay muted loop controls style="object-fit: contain; object-position: center;">
           Seu navegador não suporta vídeos.
         </video>
       `;
     } else {
       DOM.mainMediaContainer.innerHTML = `
-        <img src="${mediaItem.data}" class="main-image" alt="Produto" loading="eager">
+        <img src="${mediaItem.data}" class="main-image" alt="Produto" loading="eager" style="object-fit: contain; object-position: center;">
       `;
     }
   },
@@ -631,24 +690,35 @@ window.closeProductDetail = function () {
   ProductDetail.close();
 };
 
-// ============= CART =============
+// ============= CART (OTIMIZADO) =============
 const Cart = {
   addItem(productId) {
     const product = State.products.find((p) => p.id === productId);
     if (!product) return;
 
-    State.cart.push(product);
+    // CORREÇÃO CRÍTICA:
+    // Salvamos apenas o ID do produto, não o objeto inteiro com imagens.
+    // Isso evita o erro QuotaExceededError.
+    State.cart.push(product.id);
     State.saveCart();
     UI.updateCartUI();
     UI.showToast(`"${product.name}" adicionado ao carrinho!`);
   },
 
   removeItem(index) {
-    const removedItem = State.cart[index];
+    // Como State.cart agora é um array de IDs, removemos pelo index normalmente
+    const removedId = State.cart[index];
+    const removedItem = State.products.find((p) => p.id === removedId);
+
     State.cart.splice(index, 1);
     State.saveCart();
     UI.updateCartUI();
-    UI.showToast(`"${removedItem.name}" removido do carrinho`);
+
+    if (removedItem) {
+      UI.showToast(`"${removedItem.name}" removido do carrinho`);
+    } else {
+      UI.showToast("Item removido");
+    }
   },
 
   clear() {
@@ -671,7 +741,10 @@ const Cart = {
     let message = "*PEDIDO VULTUS:*\n\n";
     let total = 0;
 
-    State.cart.forEach((item) => {
+    State.cart.forEach((cartItemId) => {
+      const item = State.products.find((p) => p.id === cartItemId);
+      if (!item) return;
+
       message += `▪ ${item.name} - R$ ${Utils.formatPrice(item.price)}\n`;
       total += parseFloat(item.price);
     });

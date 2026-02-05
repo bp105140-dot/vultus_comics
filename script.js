@@ -1,21 +1,16 @@
 // ==========================================
-// VULTUS STORE - PROFESSIONAL EDITION
-// Modern ES6+ | Optimized Performance
+// VULTUS STORE - FIREBASE EDITION
 // ==========================================
+
+// Importa o Firebase para ler os dados
+import { db, collection, getDocs } from "./firebase.js";
 
 "use strict";
 
-// ============= CONFIGURATION =============
 const CONFIG = {
-  whatsappNumber: "5511999999999",
+  whatsappNumber: "5511984006656",
   storageKeys: {
-    products: "vultus_products",
-    categories: "vultus_categories",
     cart: "vultus_cart",
-  },
-  animation: {
-    duration: 300,
-    delay: 100,
   },
   lazyLoad: {
     rootMargin: "50px",
@@ -23,84 +18,60 @@ const CONFIG = {
   },
 };
 
-// ============= STATE MANAGEMENT =============
 const State = {
   products: [],
-  categories: ["Geral"],
+  categories: ["Geral"], // Categorias podem vir do banco depois, por enquanto fixo
   cart: [],
   currentFilter: "all",
   currentSort: "default",
   currentProduct: null,
   currentGalleryIndex: 0,
-  selectedSize: null, // Guarda o tamanho escolhido
-  selectedColor: null, // Guarda a cor escolhida
+  selectedSize: null,
+  selectedColor: null,
 
-  init() {
-    this.loadFromStorage();
+  // Agora a inicialização espera o banco de dados responder
+  async init() {
+    await this.loadData(); // <--- AQUI BUSCA DO FIREBASE
+    this.loadCart();
   },
 
-  loadFromStorage() {
-    this.products =
-      JSON.parse(localStorage.getItem(CONFIG.storageKeys.products)) || [];
-    this.categories = JSON.parse(
-      localStorage.getItem(CONFIG.storageKeys.categories),
-    ) || ["Geral"];
+  // Busca produtos no Firebase
+  async loadData() {
+    try {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        this.products = [];
+        querySnapshot.forEach((doc) => {
+            // Guarda os dados do produto + ID
+            this.products.push(doc.data());
+        });
+        console.log("Produtos carregados:", this.products.length);
+    } catch (e) {
+        console.error("Erro ao carregar produtos:", e);
+        // Fallback: Tenta carregar do localStorage antigo se der erro
+        this.products = JSON.parse(localStorage.getItem("vultus_products")) || [];
+    }
+  },
+
+  loadCart() {
     this.cart = JSON.parse(localStorage.getItem(CONFIG.storageKeys.cart)) || [];
   },
 
   saveCart() {
-    try {
-      localStorage.setItem(CONFIG.storageKeys.cart, JSON.stringify(this.cart));
-    } catch (e) {
-      console.error("Erro ao salvar carrinho:", e);
-      alert(
-        "A memória do navegador está cheia. Tente limpar alguns produtos antigos.",
-      );
-    }
+    localStorage.setItem(CONFIG.storageKeys.cart, JSON.stringify(this.cart));
   },
 };
 
-// ============= UTILITY FUNCTIONS =============
 const Utils = {
   formatPrice(value) {
     return parseFloat(value).toFixed(2).replace(".", ",");
   },
-
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  },
-
-  throttle(func, limit) {
-    let inThrottle;
-    return function (...args) {
-      if (!inThrottle) {
-        func.apply(this, args);
-        inThrottle = true;
-        setTimeout(() => (inThrottle = false), limit);
-      }
-    };
-  },
-
   sanitizeHTML(text) {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
-  },
-
-  generateId() {
-    return Date.now() + Math.random().toString(36).substr(2, 9);
-  },
+  }
 };
 
-// ============= DOM ELEMENTS =============
 const DOM = {
   loadingScreen: document.getElementById("loadingScreen"),
   toastContainer: document.getElementById("toast-container"),
@@ -128,15 +99,12 @@ const DOM = {
   btnDetailAdd: document.getElementById("btnDetailAdd"),
 };
 
-// ============= UI COMPONENTS =============
 const UI = {
   showToast(message, duration = 3000) {
     const toast = document.createElement("div");
     toast.className = "vultus-toast";
     toast.textContent = message;
-
     DOM.toastContainer.appendChild(toast);
-
     setTimeout(() => {
       toast.style.animation = "slideInRight 0.3s ease reverse";
       setTimeout(() => toast.remove(), 300);
@@ -144,21 +112,13 @@ const UI = {
   },
 
   showLoading() {
-    if (DOM.productsSkeleton) {
-      DOM.productsSkeleton.style.display = "grid";
-    }
-    if (DOM.productsGrid) {
-      DOM.productsGrid.style.opacity = "0.5";
-    }
+    if (DOM.productsSkeleton) DOM.productsSkeleton.style.display = "grid";
+    if (DOM.productsGrid) DOM.productsGrid.style.opacity = "0.5";
   },
 
   hideLoading() {
-    if (DOM.productsSkeleton) {
-      DOM.productsSkeleton.style.display = "none";
-    }
-    if (DOM.productsGrid) {
-      DOM.productsGrid.style.opacity = "1";
-    }
+    if (DOM.productsSkeleton) DOM.productsSkeleton.style.display = "none";
+    if (DOM.productsGrid) DOM.productsGrid.style.opacity = "1";
   },
 
   updateCartUI() {
@@ -166,9 +126,7 @@ const UI = {
       DOM.cartCount.textContent = State.cart.length;
       if (State.cart.length > 0) {
         DOM.cartCount.style.animation = "pulse 0.3s ease";
-        setTimeout(() => {
-          DOM.cartCount.style.animation = "";
-        }, 300);
+        setTimeout(() => DOM.cartCount.style.animation = "", 300);
       }
     }
     this.renderCartItems();
@@ -178,16 +136,7 @@ const UI = {
     if (!DOM.cartItems || !DOM.cartTotal) return;
 
     if (State.cart.length === 0) {
-      DOM.cartItems.innerHTML = `
-        <div style="text-align: center; padding: 2rem; color: #888;">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin: 0 auto 1rem;">
-            <circle cx="9" cy="21" r="1"/>
-            <circle cx="20" cy="21" r="1"/>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-          </svg>
-          <p>Seu carrinho está vazio</p>
-        </div>
-      `;
+      DOM.cartItems.innerHTML = `<div style="text-align:center;padding:2rem;color:#888;">Carrinho vazio</div>`;
       DOM.cartTotal.textContent = "R$ 0,00";
       return;
     }
@@ -196,24 +145,19 @@ const UI = {
     let total = 0;
 
     State.cart.forEach((cartItem, index) => {
-      // Suporta formato antigo (só ID) e novo (Objeto {id, size, color})
       const id = cartItem.id || cartItem;
-      const size = cartItem.size || null;
-      const color = cartItem.color || null;
+      const size = cartItem.size;
+      const color = cartItem.color;
 
       const item = State.products.find((p) => p.id === id);
       if (!item) return;
 
       total += parseFloat(item.price);
       const thumbnail = item.media && item.media[0] ? item.media[0].data : "";
-
-      // Badges de Tamanho e Cor
-      const sizeBadge = size
-        ? `<span style="font-size:0.75rem; background:#222; color:#fff; padding:2px 6px; border-radius:4px; margin-right:5px;">Tam: ${size}</span>`
-        : "";
-      const colorBadge = color
-        ? `<span style="font-size:0.75rem; background:#222; color:#fff; padding:2px 6px; border-radius:4px;">Cor: ${color}</span>`
-        : "";
+      
+      let badges = "";
+      if (size) badges += `<span style="font-size:0.75rem; background:#333; padding:2px 6px; margin-right:5px; border-radius:4px;">Tam: ${size}</span>`;
+      if (color) badges += `<span style="font-size:0.75rem; background:#333; padding:2px 6px; border-radius:4px;">Cor: ${color}</span>`;
 
       html += `
         <div class="cart-item">
@@ -221,7 +165,7 @@ const UI = {
           <div class="cart-item-info">
             <h4>${Utils.sanitizeHTML(item.name)}</h4>
             <p>R$ ${Utils.formatPrice(item.price)}</p>
-            <div style="margin-top:4px;">${sizeBadge}${colorBadge}</div>
+            <div>${badges}</div>
             <button class="btn-remove" data-index="${index}">Remover</button>
           </div>
         </div>
@@ -240,33 +184,25 @@ const UI = {
   },
 };
 
-// ============= NAVIGATION =============
 const Navigation = {
   init() {
     this.renderMenu();
     this.attachEventListeners();
-    this.setupScrollBehavior();
+    
+    // Header scroll effect
+    window.addEventListener("scroll", () => {
+        if (window.pageYOffset > 50) DOM.mainHeader.classList.add("scrolled");
+        else DOM.mainHeader.classList.remove("scrolled");
+    });
   },
 
   renderMenu() {
     if (!DOM.dynamicMenu) return;
-
-    const menuItems = [
-      { label: "Todos", value: "all" },
-      ...State.categories.map((cat) => ({ label: cat, value: cat })),
-    ];
-
-    DOM.dynamicMenu.innerHTML = menuItems
-      .map(
-        (item) => `
-        <li>
-          <a href="#" class="nav-item ${item.value === "all" ? "active" : ""}" data-category="${item.value}">
-            ${item.label}
-          </a>
-        </li>
-      `,
-      )
-      .join("");
+    const menuItems = [{ label: "Todos", value: "all" }, ...State.categories.map((cat) => ({ label: cat, value: cat }))];
+    
+    DOM.dynamicMenu.innerHTML = menuItems.map(item => `
+        <li><a href="#" class="nav-item ${item.value === "all" ? "active" : ""}" data-category="${item.value}">${item.label}</a></li>
+    `).join("");
 
     DOM.dynamicMenu.querySelectorAll(".nav-item").forEach((item) => {
       item.addEventListener("click", (e) => {
@@ -278,78 +214,28 @@ const Navigation = {
 
   handleCategoryChange(category) {
     State.currentFilter = category;
-
     document.querySelectorAll(".nav-item").forEach((item) => {
       item.classList.toggle("active", item.dataset.category === category);
     });
-
-    if (DOM.mainNav.classList.contains("active")) {
-      this.toggleMobileMenu();
-    }
-
+    if (DOM.mainNav.classList.contains("active")) this.toggleMobileMenu();
     Products.render();
-
-    const productsSection = document.getElementById("produtos");
-    if (productsSection) {
-      setTimeout(() => {
-        productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-    }
+    document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
   },
 
   toggleMobileMenu() {
-    if (DOM.mobileMenuToggle && DOM.mainNav) {
-      const isActive = DOM.mainNav.classList.toggle("active");
-      DOM.mobileMenuToggle.classList.toggle("active");
-      DOM.mobileMenuToggle.setAttribute("aria-expanded", isActive);
-      document.body.style.overflow = isActive ? "hidden" : "";
-    }
+    DOM.mainNav.classList.toggle("active");
+    DOM.mobileMenuToggle.classList.toggle("active");
   },
 
   attachEventListeners() {
-    if (DOM.mobileMenuToggle) {
-      DOM.mobileMenuToggle.addEventListener("click", () =>
-        this.toggleMobileMenu(),
-      );
-    }
-
-    if (DOM.mainNav) {
-      DOM.mainNav.addEventListener("click", (e) => {
-        if (
-          e.target === DOM.mainNav &&
-          DOM.mainNav.classList.contains("active")
-        ) {
-          this.toggleMobileMenu();
-        }
-      });
-    }
-
-    if (DOM.sortSelect) {
-      DOM.sortSelect.addEventListener("change", (e) => {
+    DOM.mobileMenuToggle?.addEventListener("click", () => this.toggleMobileMenu());
+    DOM.sortSelect?.addEventListener("change", (e) => {
         State.currentSort = e.target.value;
         Products.render();
-      });
-    }
-  },
-
-  setupScrollBehavior() {
-    let lastScroll = 0;
-    const handleScroll = Utils.throttle(() => {
-      const currentScroll = window.pageYOffset;
-      if (DOM.mainHeader) {
-        if (currentScroll > 100) {
-          DOM.mainHeader.classList.add("scrolled");
-        } else {
-          DOM.mainHeader.classList.remove("scrolled");
-        }
-      }
-      lastScroll = currentScroll;
-    }, 100);
-    window.addEventListener("scroll", handleScroll);
-  },
+    });
+  }
 };
 
-// ============= PRODUCTS =============
 const Products = {
   init() {
     this.render();
@@ -357,44 +243,30 @@ const Products = {
 
   getFilteredAndSorted() {
     let filtered = [...State.products];
-
     if (State.currentFilter !== "all") {
       filtered = filtered.filter((p) => p.category === State.currentFilter);
     }
-
-    switch (State.currentSort) {
-      case "price-asc":
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case "name-asc":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "name-desc":
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-    }
-
+    // Ordenação básica
+    if (State.currentSort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+    if (State.currentSort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+    if (State.currentSort === 'name-asc') filtered.sort((a, b) => a.name.localeCompare(b.name));
+    
     return filtered;
   },
 
   render() {
     if (!DOM.productsGrid) return;
     UI.showLoading();
+    
     const products = this.getFilteredAndSorted();
 
+    // Pequeno delay para garantir que o DOM atualize
     requestAnimationFrame(() => {
       if (products.length === 0) {
         DOM.productsGrid.innerHTML = "";
-        if (DOM.emptyState) {
-          DOM.emptyState.style.display = "block";
-        }
+        if (DOM.emptyState) DOM.emptyState.style.display = "block";
       } else {
-        if (DOM.emptyState) {
-          DOM.emptyState.style.display = "none";
-        }
+        if (DOM.emptyState) DOM.emptyState.style.display = "none";
         this.renderProductCards(products);
       }
       UI.hideLoading();
@@ -402,118 +274,54 @@ const Products = {
   },
 
   renderProductCards(products) {
-    const fragment = document.createDocumentFragment();
-    products.forEach((product) => {
-      const card = this.createProductCard(product);
-      fragment.appendChild(card);
-    });
     DOM.productsGrid.innerHTML = "";
-    DOM.productsGrid.appendChild(fragment);
-    this.setupLazyLoading();
-  },
+    const fragment = document.createDocumentFragment();
+    
+    products.forEach((product) => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      
+      // Lógica de Mídia (Imagem/Video)
+      let mediaHtml = '<div class="product-image-container" style="background:#222"></div>';
+      if (product.media && product.media.length > 0) {
+          const first = product.media[0];
+          const second = product.media.length > 1 ? product.media[1] : first;
+          
+          const getTag = (item, cls) => item.type === 'video' 
+            ? `<video src="${item.data}" class="product-image ${cls}" autoplay muted loop playsinline></video>`
+            : `<img src="${item.data}" class="product-image ${cls}" loading="lazy">`;
 
-  createProductCard(product) {
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.setAttribute("role", "article");
-    card.setAttribute("data-product-id", product.id);
+          mediaHtml = `<div class="product-image-container">${getTag(first, 'img-front')}${getTag(second, 'img-back')}</div>`;
+      }
 
-    let mediaHtml = "";
-    if (product.media && product.media.length > 0) {
-      const first = product.media[0];
-      const second = product.media.length > 1 ? product.media[1] : first;
+      card.innerHTML = `
+        ${product.tag ? `<span class="product-tag">${product.tag}</span>` : ""}
+        ${mediaHtml}
+        <div class="product-info-area">
+            <h3 class="product-name">${Utils.sanitizeHTML(product.name)}</h3>
+            <div class="price-box">
+                ${product.originalPrice ? `<span class="old-price">R$ ${Utils.formatPrice(product.originalPrice)}</span>` : ""}
+                <span class="current-price">R$ ${Utils.formatPrice(product.price)}</span>
+            </div>
+        </div>
+        <button class="btn-add-to-cart">Adicionar</button>
+      `;
 
-      const getMediaTag = (item, className) => {
-        if (item.type === "video") {
-          return `<video src="${item.data}" class="product-image ${className}" autoplay muted loop playsinline loading="lazy"></video>`;
-        }
-        return `<img data-src="${item.data}" class="product-image ${className} lazy" alt="${Utils.sanitizeHTML(product.name)}">`;
+      // Eventos
+      card.querySelector(".product-image-container").onclick = () => ProductDetail.open(product.id);
+      card.querySelector(".product-info-area").onclick = () => ProductDetail.open(product.id);
+      card.querySelector(".btn-add-to-cart").onclick = (e) => {
+          e.stopPropagation();
+          ProductDetail.open(product.id); // Abre modal para escolher tamanho/cor
       };
 
-      mediaHtml = `
-        <div class="product-image-container">
-          ${getMediaTag(first, "img-front")}
-          ${getMediaTag(second, "img-back")}
-        </div>
-      `;
-    } else {
-      mediaHtml =
-        '<div class="product-image-container" style="background:#222"></div>';
-    }
-
-    card.innerHTML = `
-      ${product.tag ? `<span class="product-tag">${Utils.sanitizeHTML(product.tag)}</span>` : ""}
-      ${mediaHtml}
-      <div class="product-info-area">
-        <h3 class="product-name">${Utils.sanitizeHTML(product.name)}</h3>
-        <div class="price-box">
-          ${product.originalPrice ? `<span class="old-price">R$ ${Utils.formatPrice(product.originalPrice)}</span>` : ""}
-          <span class="current-price">R$ ${Utils.formatPrice(product.price)}</span>
-        </div>
-      </div>
-      <button class="btn-add-to-cart" data-product-id="${product.id}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 2L9 6M15 2L15 6M6 6H18C19.1046 6 20 6.89543 20 8V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V8C4 6.89543 4.89543 6 6 6Z"/>
-        </svg>
-        Adicionar
-      </button>
-    `;
-
-    const imageContainer = card.querySelector(".product-image-container");
-    const infoArea = card.querySelector(".product-info-area");
-    const addBtn = card.querySelector(".btn-add-to-cart");
-
-    if (imageContainer) {
-      imageContainer.addEventListener("click", (e) => {
-        e.stopPropagation();
-        ProductDetail.open(product.id);
-      });
-    }
-
-    if (infoArea) {
-      infoArea.addEventListener("click", (e) => {
-        e.stopPropagation();
-        ProductDetail.open(product.id);
-      });
-    }
-
-    if (addBtn) {
-      addBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        // Adiciona direto sem opções, a menos que abra modal.
-        // Melhor forçar abrir modal se tiver opções, mas aqui simplificamos.
-        // Se clicar no botão "Adicionar" do card, ele abre o modal para escolher
-        ProductDetail.open(product.id);
-      });
-    }
-
-    return card;
-  },
-
-  setupLazyLoading() {
-    const lazyImages = document.querySelectorAll("img.lazy");
-    if ("IntersectionObserver" in window) {
-      const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            img.src = img.dataset.src;
-            img.classList.remove("lazy");
-            imageObserver.unobserve(img);
-          }
-        });
-      }, CONFIG.lazyLoad);
-      lazyImages.forEach((img) => imageObserver.observe(img));
-    } else {
-      lazyImages.forEach((img) => {
-        img.src = img.dataset.src;
-        img.classList.remove("lazy");
-      });
-    }
-  },
+      fragment.appendChild(card);
+    });
+    
+    DOM.productsGrid.appendChild(fragment);
+  }
 };
 
-// ============= PRODUCT DETAIL =============
 const ProductDetail = {
   open(productId) {
     const product = State.products.find((p) => p.id === productId);
@@ -521,418 +329,209 @@ const ProductDetail = {
     State.currentProduct = product;
     State.currentGalleryIndex = 0;
     this.render(product);
-    if (DOM.productDetailModal) {
-      DOM.productDetailModal.style.display = "flex";
-      document.body.style.overflow = "hidden";
-      requestAnimationFrame(() => {
-        DOM.productDetailModal.querySelector(
-          ".detail-container",
-        ).style.animation = "fadeInUp 0.3s ease";
-      });
-    }
+    DOM.productDetailModal.style.display = "flex";
+    document.body.style.overflow = "hidden";
   },
 
   close() {
-    if (DOM.productDetailModal) {
-      const container =
-        DOM.productDetailModal.querySelector(".detail-container");
-      container.style.animation = "fadeInUp 0.3s ease reverse";
-      setTimeout(() => {
-        DOM.productDetailModal.style.display = "none";
-        document.body.style.overflow = "";
-      }, 300);
-    }
+    DOM.productDetailModal.style.display = "none";
+    document.body.style.overflow = "";
   },
 
   render(product) {
-    if (DOM.detailName) DOM.detailName.textContent = product.name;
-    if (DOM.detailCat) DOM.detailCat.textContent = product.category || "GERAL";
-    if (DOM.detailPrice)
-      DOM.detailPrice.textContent = `R$ ${Utils.formatPrice(product.price)}`;
+    DOM.detailName.textContent = product.name;
+    DOM.detailCat.textContent = product.category || "GERAL";
+    DOM.detailPrice.textContent = `R$ ${Utils.formatPrice(product.price)}`;
+    DOM.detailDesc.textContent = product.description || "";
+    DOM.detailSpecs.textContent = product.specs || "";
+    
     if (DOM.detailOldPrice) {
-      if (product.originalPrice) {
-        DOM.detailOldPrice.textContent = `R$ ${Utils.formatPrice(product.originalPrice)}`;
-        DOM.detailOldPrice.style.display = "inline";
-      } else {
-        DOM.detailOldPrice.style.display = "none";
-      }
-    }
-    if (DOM.detailDesc) {
-      DOM.detailDesc.textContent =
-        product.description || "Sem descrição disponível.";
-    }
-    if (DOM.detailSpecs) {
-      DOM.detailSpecs.textContent =
-        product.specs || "Informações não disponíveis.";
+        DOM.detailOldPrice.style.display = product.originalPrice ? "inline" : "none";
+        if(product.originalPrice) DOM.detailOldPrice.textContent = `R$ ${Utils.formatPrice(product.originalPrice)}`;
     }
 
-    // --- RESETAR SELEÇÕES ---
+    // Reset
     State.selectedSize = null;
     State.selectedColor = null;
 
-    // --- RENDERIZAR TAMANHOS ---
-    const sizeSelector = document.getElementById("sizeSelector");
+    // Tamanhos
+    const sizeSel = document.getElementById("sizeSelector");
     if (product.sizes && product.sizes.length > 0) {
-      sizeSelector.style.display = "flex";
-      const sizeOptions = sizeSelector.querySelector(".size-options");
-      sizeOptions.innerHTML = "";
-      product.sizes.forEach((size) => {
-        const btn = document.createElement("button");
-        btn.className = "size-option";
-        btn.textContent = size;
-        btn.onclick = () => {
-          sizeOptions
-            .querySelectorAll(".size-option")
-            .forEach((b) => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          State.selectedSize = size;
-        };
-        sizeOptions.appendChild(btn);
-      });
+        sizeSel.style.display = "flex";
+        const opts = sizeSel.querySelector(".size-options");
+        opts.innerHTML = "";
+        product.sizes.forEach(s => {
+            const btn = document.createElement("button");
+            btn.className = "size-option";
+            btn.textContent = s;
+            btn.onclick = () => {
+                opts.querySelectorAll(".size-option").forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                State.selectedSize = s;
+            };
+            opts.appendChild(btn);
+        });
     } else {
-      sizeSelector.style.display = "none";
+        sizeSel.style.display = "none";
     }
 
-    // --- RENDERIZAR CORES ---
-    const colorSelector = document.getElementById("colorSelector");
+    // Cores
+    const colSel = document.getElementById("colorSelector");
     if (product.colors && product.colors.length > 0) {
-      colorSelector.style.display = "flex";
-      const colorOptions = colorSelector.querySelector(".size-options"); // Reusando classe CSS
-      colorOptions.innerHTML = "";
-      product.colors.forEach((color) => {
-        const btn = document.createElement("button");
-        btn.className = "size-option"; // Reusando estilo de botão
-        btn.textContent = color;
-        btn.onclick = () => {
-          colorOptions
-            .querySelectorAll(".size-option")
-            .forEach((b) => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          State.selectedColor = color;
-        };
-        colorOptions.appendChild(btn);
-      });
+        colSel.style.display = "flex";
+        const opts = colSel.querySelector(".size-options");
+        opts.innerHTML = "";
+        product.colors.forEach(c => {
+            const btn = document.createElement("button");
+            btn.className = "size-option";
+            btn.textContent = c;
+            btn.onclick = () => {
+                opts.querySelectorAll(".size-option").forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                State.selectedColor = c;
+            };
+            opts.appendChild(btn);
+        });
     } else {
-      colorSelector.style.display = "none";
+        colSel.style.display = "none";
     }
 
     this.renderGallery(product);
 
-    if (DOM.btnDetailAdd) {
-      DOM.btnDetailAdd.onclick = (e) => {
-        e.preventDefault();
-
-        // Validação de Tamanho
-        if (product.sizes && product.sizes.length > 0 && !State.selectedSize) {
-          UI.showToast("⚠️ Por favor, selecione um tamanho.");
-          return;
+    DOM.btnDetailAdd.onclick = () => {
+        if(product.sizes?.length > 0 && !State.selectedSize) {
+            UI.showToast("Selecione um tamanho!");
+            return;
         }
-
-        // Validação de Cor
-        if (
-          product.colors &&
-          product.colors.length > 0 &&
-          !State.selectedColor
-        ) {
-          UI.showToast("⚠️ Por favor, selecione uma cor.");
-          return;
+        if(product.colors?.length > 0 && !State.selectedColor) {
+            UI.showToast("Selecione uma cor!");
+            return;
         }
-
         Cart.addItem(product.id, State.selectedSize, State.selectedColor);
         this.close();
         openCart();
-      };
-    }
+    };
   },
 
   renderGallery(product) {
-    if (!product.media || product.media.length === 0) {
-      if (DOM.mainMediaContainer) {
-        DOM.mainMediaContainer.innerHTML =
-          '<div style="width:100%;aspect-ratio:3/4;background:#222"></div>';
-      }
-      if (DOM.thumbsList) {
-        DOM.thumbsList.innerHTML = "";
-      }
-      return;
-    }
-    this.setMainMedia(product.media[State.currentGalleryIndex]);
-    if (DOM.thumbsList) {
-      DOM.thumbsList.innerHTML = "";
-      product.media.forEach((media, index) => {
-        const thumb = document.createElement(
-          media.type === "video" ? "video" : "img",
-        );
-        thumb.src = media.data;
-        thumb.className = `thumb ${index === State.currentGalleryIndex ? "active" : ""}`;
-        thumb.setAttribute("loading", "lazy");
-        thumb.addEventListener("click", () => {
-          State.currentGalleryIndex = index;
-          this.setMainMedia(media);
-          DOM.thumbsList.querySelectorAll(".thumb").forEach((t, i) => {
-            t.classList.toggle("active", i === index);
-          });
-        });
+    if(!product.media || product.media.length === 0) return;
+    this.setMainMedia(product.media[0]);
+    
+    DOM.thumbsList.innerHTML = "";
+    product.media.forEach((m, i) => {
+        const thumb = document.createElement(m.type === 'video' ? 'video' : 'img');
+        thumb.src = m.data;
+        thumb.className = `thumb ${i === 0 ? 'active' : ''}`;
+        thumb.onclick = () => {
+            State.currentGalleryIndex = i;
+            this.setMainMedia(m);
+            document.querySelectorAll(".thumb").forEach(t => t.classList.remove("active"));
+            thumb.classList.add("active");
+        };
         DOM.thumbsList.appendChild(thumb);
-      });
-    }
-  },
-
-  setMainMedia(mediaItem) {
-    if (!DOM.mainMediaContainer) return;
-    if (mediaItem.type === "video") {
-      DOM.mainMediaContainer.innerHTML = `
-        <video src="${mediaItem.data}" class="main-image" autoplay muted loop controls style="object-fit: contain; object-position: center;">
-          Seu navegador não suporta vídeos.
-        </video>
-      `;
-    } else {
-      DOM.mainMediaContainer.innerHTML = `
-        <img src="${mediaItem.data}" class="main-image" alt="Produto" loading="eager" style="object-fit: contain; object-position: center;">
-      `;
-    }
-  },
-};
-
-window.navigateGallery = function (direction) {
-  if (!State.currentProduct || !State.currentProduct.media) return;
-  const totalMedia = State.currentProduct.media.length;
-  State.currentGalleryIndex =
-    (State.currentGalleryIndex + direction + totalMedia) % totalMedia;
-  ProductDetail.setMainMedia(
-    State.currentProduct.media[State.currentGalleryIndex],
-  );
-  if (DOM.thumbsList) {
-    DOM.thumbsList.querySelectorAll(".thumb").forEach((thumb, index) => {
-      thumb.classList.toggle("active", index === State.currentGalleryIndex);
     });
+  },
+
+  setMainMedia(item) {
+    if(item.type === 'video') {
+        DOM.mainMediaContainer.innerHTML = `<video src="${item.data}" class="main-image" autoplay muted loop controls></video>`;
+    } else {
+        DOM.mainMediaContainer.innerHTML = `<img src="${item.data}" class="main-image">`;
+    }
   }
 };
 
-window.closeProductDetail = function () {
-  ProductDetail.close();
+window.navigateGallery = (dir) => {
+    if(!State.currentProduct?.media) return;
+    const len = State.currentProduct.media.length;
+    State.currentGalleryIndex = (State.currentGalleryIndex + dir + len) % len;
+    ProductDetail.setMainMedia(State.currentProduct.media[State.currentGalleryIndex]);
+    
+    document.querySelectorAll(".thumb").forEach((t, i) => {
+        t.classList.toggle("active", i === State.currentGalleryIndex);
+    });
 };
 
-// ============= CART =============
+window.closeProductDetail = () => ProductDetail.close();
+
 const Cart = {
-  addItem(productId, size = null, color = null) {
-    const product = State.products.find((p) => p.id === productId);
+  addItem(id, size, color) {
+    const product = State.products.find(p => p.id === id);
     if (!product) return;
-
-    // Guarda objeto completo com seleções
-    State.cart.push({
-      id: product.id,
-      size: size,
-      color: color,
-    });
-
+    State.cart.push({ id, size, color });
     State.saveCart();
     UI.updateCartUI();
-    UI.showToast(`"${product.name}" adicionado!`);
+    UI.showToast("Adicionado ao carrinho!");
   },
-
   removeItem(index) {
     State.cart.splice(index, 1);
     State.saveCart();
     UI.updateCartUI();
-    UI.showToast("Item removido");
   },
-
   clear() {
-    if (State.cart.length === 0) return;
-    if (confirm("Deseja realmente limpar o carrinho?")) {
-      State.cart = [];
-      State.saveCart();
-      UI.updateCartUI();
-      UI.showToast("Carrinho limpo");
+    if(confirm("Limpar carrinho?")) {
+        State.cart = [];
+        State.saveCart();
+        UI.updateCartUI();
     }
   },
-
   checkout() {
-    if (State.cart.length === 0) {
-      UI.showToast("Seu carrinho está vazio");
-      return;
-    }
-
-    let message = "*PEDIDO VULTUS:*\n\n";
+    if (State.cart.length === 0) return UI.showToast("Carrinho vazio");
+    let msg = "*PEDIDO VULTUS:*\n\n";
     let total = 0;
-
-    State.cart.forEach((cartItem) => {
-      const id = cartItem.id || cartItem;
-      const size = cartItem.size;
-      const color = cartItem.color;
-
-      const item = State.products.find((p) => p.id === id);
-      if (!item) return;
-
-      let details = "";
-      if (size) details += ` [Tam: ${size}]`;
-      if (color) details += ` [Cor: ${color}]`;
-
-      message += `▪ ${item.name}${details} - R$ ${Utils.formatPrice(item.price)}\n`;
-      total += parseFloat(item.price);
+    State.cart.forEach(item => {
+        const p = State.products.find(prod => prod.id === item.id);
+        if(p) {
+            let detail = "";
+            if(item.size) detail += ` [Tam: ${item.size}]`;
+            if(item.color) detail += ` [Cor: ${item.color}]`;
+            msg += `▪ ${p.name}${detail} - R$ ${Utils.formatPrice(p.price)}\n`;
+            total += p.price;
+        }
     });
-
-    message += `\n*TOTAL: R$ ${Utils.formatPrice(total)}*`;
-
-    const whatsappUrl = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
-  },
-};
-
-window.openCart = function () {
-  if (DOM.cartModal) {
-    DOM.cartModal.style.display = "flex";
-    document.body.style.overflow = "hidden";
+    msg += `\n*TOTAL: R$ ${Utils.formatPrice(total)}*`;
+    window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank");
   }
 };
 
-window.closeCart = function () {
-  if (DOM.cartModal) {
-    DOM.cartModal.style.display = "none";
-    document.body.style.overflow = "";
-  }
+// Globais para HTML
+window.openCart = () => DOM.cartModal.style.display = "flex";
+window.closeCart = () => DOM.cartModal.style.display = "none";
+window.checkoutWhatsApp = () => Cart.checkout();
+window.clearCart = () => Cart.clear();
+window.handleNewsletter = (e) => {
+    e.preventDefault();
+    UI.showToast("Inscrito com sucesso!");
+    e.target.reset();
 };
 
-window.checkoutWhatsApp = function () {
-  Cart.checkout();
-};
+// Iniciar a aplicação
+document.addEventListener("DOMContentLoaded", () => App.init());
 
-window.clearCart = function () {
-  Cart.clear();
-};
-
-// ============= NEWSLETTER =============
-window.handleNewsletter = function (event) {
-  event.preventDefault();
-  const email = event.target.querySelector('input[type="email"]').value;
-  if (email) {
-    UI.showToast(
-      "Obrigado por se inscrever! Em breve você receberá nossas novidades.",
-    );
-    event.target.reset();
-  }
-};
-
-// ============= INITIALIZATION =============
-const App = {
-  init() {
-    State.init();
-    if (DOM.loadingScreen) {
-      setTimeout(() => {
-        DOM.loadingScreen.classList.add("fade-out");
-        setTimeout(() => {
-          DOM.loadingScreen.style.display = "none";
-        }, 500);
-      }, 1000);
-    }
-    Navigation.init();
-    Products.init();
-    UI.updateCartUI();
-    this.setupKeyboardShortcuts();
-    this.setupAdminAccess(); // Inicializa a proteção do botão Admin
-    console.log("🚀 Vultus Store initialized successfully!");
-  },
-
-  setupKeyboardShortcuts() {
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        if (DOM.productDetailModal?.style.display === "flex") {
-          ProductDetail.close();
-        }
-        if (DOM.cartModal?.style.display === "flex") {
-          closeCart();
-        }
-        if (DOM.mainNav?.classList.contains("active")) {
-          Navigation.toggleMobileMenu();
-        }
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        openCart();
-      }
-    });
-  },
-
-  // Lógica do botão Admin (Modal Seguro)
-  setupAdminAccess() {
-    const btnOpen = document.getElementById("btnAdminAccess");
+// Lógica Admin (Botão e Modal)
+const setupAdmin = () => {
+    const btn = document.getElementById("btnAdminAccess");
     const modal = document.getElementById("adminModal");
     const input = document.getElementById("adminPassInput");
-    const btnConfirm = document.getElementById("btnConfirmAdmin");
-    const btnCancel = document.getElementById("btnCancelAdmin");
-
-    // Função para verificar senha
-    const checkPassword = () => {
-      const pass = input.value;
-      if (pass === "*K4m1k4z3") {
-        UI.showToast("Acesso autorizado!");
-        setTimeout(() => {
-          window.location.href = "admin.html";
-        }, 500);
-      } else {
-        UI.showToast("⛔ Senha incorreta");
-        input.value = ""; // Limpa o campo
-        input.focus(); // Devolve o foco
-
-        // Efeito visual de erro
-        input.style.borderColor = "red";
-        setTimeout(() => (input.style.borderColor = ""), 300);
-      }
-    };
-
-    // Abrir o modal
-    if (btnOpen) {
-      btnOpen.addEventListener("click", () => {
-        modal.style.display = "flex";
-        input.value = "";
-        setTimeout(() => input.focus(), 100);
-      });
+    
+    if(btn) {
+        btn.onclick = () => {
+            modal.style.display = "flex";
+            setTimeout(() => input.focus(), 100);
+        };
     }
-
-    // Botão Confirmar
-    if (btnConfirm) {
-      btnConfirm.addEventListener("click", checkPassword);
-    }
-
-    // Botão Cancelar
-    if (btnCancel) {
-      btnCancel.addEventListener("click", () => {
+    
+    document.getElementById("btnConfirmAdmin")?.addEventListener("click", () => {
+        if(input.value === "*K4m1k4z3") {
+            window.location.href = "admin.html";
+        } else {
+            UI.showToast("Senha incorreta");
+            input.value = "";
+        }
+    });
+    
+    document.getElementById("btnCancelAdmin")?.addEventListener("click", () => {
         modal.style.display = "none";
-      });
-    }
-
-    // Permitir apertar ENTER para entrar
-    if (input) {
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          checkPassword();
-        }
-        if (e.key === "Escape") {
-          modal.style.display = "none";
-        }
-      });
-    }
-
-    // Fechar se clicar fora do modal
-    if (modal) {
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-          modal.style.display = "none";
-        }
-      });
-    }
-  },
+    });
 };
-
-// ============= START APPLICATION =============
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => App.init());
-} else {
-  App.init();
-}
-
-// ============= ERROR HANDLING =============
-window.addEventListener("error", (e) => {
-  console.error("Global error:", e.error);
-});
+setupAdmin();

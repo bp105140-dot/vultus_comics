@@ -150,7 +150,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ============= LOADING SCREEN ============= */
+/* ============= LOADING SCREEN (ATUALIZADO) ============= */
 .loading-screen {
   position: fixed;
   inset: 0;
@@ -159,9 +159,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  transition:
-    opacity 0.5s,
-    visibility 0.5s;
+  transition: opacity 0.5s, visibility 0.5s;
 }
 
 .loading-screen.fade-out {
@@ -171,8 +169,13 @@ button:disabled {
 
 .loading-logo {
   text-align: center;
+  /* Adicionei flexbox para garantir centralização vertical/horizontal do conjunto */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+/* --- REMOVE OU COMENTA O ESTILO ANTIGO DO SPAN ---
 .loading-logo span {
   font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 4rem);
@@ -181,6 +184,17 @@ button:disabled {
   color: var(--primary);
   display: block;
   margin-bottom: var(--space-md);
+} 
+-------------------------------------------------- */
+
+/* --- ADICIONA O NOVO ESTILO PARA A IMAGEM --- */
+.loading-logo-img {
+  max-width: 250px; /* Define um tamanho máximo para não ficar gigante */
+  width: 80%; /* Fica responsivo em telas pequenas */
+  height: auto;
+  display: block;
+  /* Margem automática nas laterais para centralizar e espaço em baixo */
+  margin: 0 auto var(--space-md) auto; 
 }
 
 .loading-bar {
@@ -189,25 +203,10 @@ button:disabled {
   background: var(--border);
   position: relative;
   overflow: hidden;
+  /* Garante que a barra também está centralizada */
+  margin: 0 auto; 
 }
-
-.loading-bar::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: var(--primary);
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  to {
-    left: 100%;
-  }
-}
-
+/* ... (o resto do CSS da loading-bar e keyframes continua igual) ... */
 /* ============= TOAST NOTIFICATIONS ============= */
 .toast-container {
   position: fixed;
@@ -1942,3 +1941,4 @@ button:disabled {
     opacity: 1;
   }
 }
+

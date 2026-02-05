@@ -616,7 +616,17 @@
         </div>
       </div>
     </footer>
-
+<script>
+      setTimeout(() => {
+        const loader = document.getElementById('loadingScreen');
+        if (loader && loader.style.display !== 'none') {
+          console.warn("Carregamento forçado por demora na resposta.");
+          loader.style.opacity = '0';
+          setTimeout(() => loader.style.display = 'none', 500);
+        }
+      }, 4000); // 4 segundos
+    </script>
     <script type="module" src="script.js"></script>
   </body>
 </html>
+

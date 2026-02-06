@@ -571,13 +571,33 @@
       <div class="footer-bottom">
         <p>&copy; 2026 Vultus Store. Todos os direitos reservados.</p>
 
-        <button
-          id="btnAdminAccess"
-          aria-label="Área Administrativa"
-          style="background:none; border:none; color: #333; cursor: pointer; text-transform: uppercase; font-size: 0.7rem;"
-        >
+        <button id="btnAdminAccess" aria-label="Área Administrativa">
           🔒 Área Restrita
         </button>
+
+        <div id="adminModal" class="admin-modal">
+          <div class="admin-modal-content">
+            <h3>Área Restrita</h3>
+            <p>Acesso exclusivo para administradores</p>
+
+            <input
+              type="password"
+              id="adminPassInput"
+              class="admin-input"
+              placeholder="SENHA"
+              autofocus
+            />
+
+            <div class="admin-actions">
+              <button id="btnCancelAdmin" class="btn-admin-cancel">
+                Cancelar
+              </button>
+              <button id="btnConfirmAdmin" class="btn-admin-confirm">
+                Entrar
+              </button>
+            </div>
+          </div>
+        </div>
 
         <div class="payment-methods">
           <span>Pagamento seguro:</span>
@@ -596,34 +616,17 @@
         </div>
       </div>
     </footer>
-
-    <div id="adminModal" class="admin-modal">
-      <div class="admin-modal-content">
-        <h3>Área Restrita</h3>
-        <p>Acesso exclusivo para administradores</p>
-
-        <input
-          type="password"
-          id="adminPassInput"
-          class="admin-input"
-          placeholder="SENHA"
-          autofocus
-        />
-
-        <div class="admin-actions">
-          <button id="btnCancelAdmin" class="btn-admin-cancel">Cancelar</button>
-          <button id="btnConfirmAdmin" class="btn-admin-confirm">Entrar</button>
-        </div>
-      </div>
-    </div>
-
-    <script>
+<script>
       setTimeout(() => {
-        const l = document.getElementById("loadingScreen");
-        if (l && l.style.display !== "none") l.style.display = "none";
-      }, 5000);
+        const loader = document.getElementById('loadingScreen');
+        if (loader && loader.style.display !== 'none') {
+          console.warn("Carregamento forçado por demora na resposta.");
+          loader.style.opacity = '0';
+          setTimeout(() => loader.style.display = 'none', 500);
+        }
+      }, 4000); // 4 segundos
     </script>
-
     <script type="module" src="script.js"></script>
   </body>
 </html>
+

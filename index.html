@@ -42,7 +42,7 @@
   <body>
     <div id="loadingScreen" class="loading-screen">
       <div class="loading-logo">
-        <img src="img/LOGO.png" alt="Vultus Loading" class="loading-logo-img">
+        <img src="img/LOGO.png" alt="Vultus Loading" class="loading-logo-img" />
         <div class="loading-bar"></div>
       </div>
     </div>
@@ -352,14 +352,12 @@
 
           <div class="size-selector" id="sizeSelector" style="display: none">
             <h3 class="info-title">Selecione o Tamanho</h3>
-            <div class="size-options">
-              </div>
+            <div class="size-options"></div>
           </div>
 
           <div class="size-selector" id="colorSelector" style="display: none">
             <h3 class="info-title">Selecione a Cor</h3>
-            <div class="size-options">
-              </div>
+            <div class="size-options"></div>
           </div>
 
           <button class="btn-add-cart-large" id="btnDetailAdd">
@@ -575,30 +573,6 @@
           🔒 Área Restrita
         </button>
 
-        <div id="adminModal" class="admin-modal">
-          <div class="admin-modal-content">
-            <h3>Área Restrita</h3>
-            <p>Acesso exclusivo para administradores</p>
-
-            <input
-              type="password"
-              id="adminPassInput"
-              class="admin-input"
-              placeholder="SENHA"
-              autofocus
-            />
-
-            <div class="admin-actions">
-              <button id="btnCancelAdmin" class="btn-admin-cancel">
-                Cancelar
-              </button>
-              <button id="btnConfirmAdmin" class="btn-admin-confirm">
-                Entrar
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div class="payment-methods">
           <span>Pagamento seguro:</span>
           <img
@@ -616,17 +590,27 @@
         </div>
       </div>
     </footer>
-<script>
-      setTimeout(() => {
-        const loader = document.getElementById('loadingScreen');
-        if (loader && loader.style.display !== 'none') {
-          console.warn("Carregamento forçado por demora na resposta.");
-          loader.style.opacity = '0';
-          setTimeout(() => loader.style.display = 'none', 500);
-        }
-      }, 4000); // 4 segundos
-    </script>
+
+    <div id="adminModal" class="admin-modal">
+      <div class="admin-modal-content">
+        <h3>Área Restrita</h3>
+        <p>Acesso exclusivo para administradores</p>
+
+        <input
+          type="password"
+          id="adminPassInput"
+          class="admin-input"
+          placeholder="SENHA"
+          autofocus
+        />
+
+        <div class="admin-actions">
+          <button id="btnCancelAdmin" class="btn-admin-cancel">Cancelar</button>
+          <button id="btnConfirmAdmin" class="btn-admin-confirm">Entrar</button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="script.js"></script>
   </body>
 </html>
-

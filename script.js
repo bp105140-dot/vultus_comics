@@ -1,5 +1,5 @@
 // ==========================================
-// VULTUS STORE - FINAL VERSION (FIREBASE + ADMIN MODAL)
+// VULTUS STORE - FIREBASE EDITION (CORRIGIDO)
 // ==========================================
 
 // 1. IMPORTA O FIREBASE
@@ -21,7 +21,7 @@ const CONFIG = {
 // ============= STATE MANAGEMENT =============
 const State = {
   products: [],
-  categories: ["Geral"],
+  categories: ["Geral"], // Começa com o padrão
   cart: [],
   currentFilter: "all",
   currentSort: "default",
@@ -35,19 +35,36 @@ const State = {
     this.loadCart();
   },
 
-  // BUSCA DADOS NO FIREBASE
+  // BUSCA DADOS NO FIREBASE E GERA CATEGORIAS
   async loadData() {
     try {
         const querySnapshot = await getDocs(collection(db, "products"));
         this.products = [];
+        
+        // Criamos um "Conjunto" (Set) para guardar categorias únicas
+        const uniqueCategories = new Set(); 
+
         querySnapshot.forEach((doc) => {
-            // Garante que pegamos o ID do Firebase e os dados
-            this.products.push({ id: doc.id, ...doc.data() });
+            const data = doc.data();
+            // Salva o produto
+            this.products.push({ id: doc.id, ...data });
+            
+            // Se o produto tem categoria, adiciona à lista
+            if (data.category && data.category !== "Geral") {
+                uniqueCategories.add(data.category);
+            }
         });
+
+        // Atualiza a lista de categorias do site
+        // Mantém "Geral" se quiseres, ou remove. Aqui adicionamos as encontradas.
+        this.categories = ["Geral", ...Array.from(uniqueCategories)];
+        
         console.log("Produtos carregados:", this.products.length);
+        console.log("Categorias encontradas:", this.categories);
+
     } catch (e) {
         console.error("Erro ao carregar produtos:", e);
-        // Fallback para LocalStorage se der erro na internet
+        // Fallback
         this.products = JSON.parse(localStorage.getItem("vultus_products")) || [];
     }
   },
@@ -212,6 +229,8 @@ const Navigation = {
 
   renderMenu() {
     if (!DOM.dynamicMenu) return;
+    
+    // GERA O MENU DINAMICAMENTE COM BASE NO STATE.CATEGORIES
     const menuItems = [{ label: "Todos", value: "all" }, ...State.categories.map((cat) => ({ label: cat, value: cat }))];
     
     DOM.dynamicMenu.innerHTML = menuItems.map(item => `
@@ -516,7 +535,7 @@ const Cart = {
 // ============= INICIALIZAÇÃO E ADMIN =============
 const App = {
   async init() {
-    await State.init(); // Carrega Firebase
+    await State.init(); // Carrega Firebase e gera categorias
     
     // Destrava Loading Screen
     if (DOM.loadingScreen) {
@@ -526,7 +545,7 @@ const App = {
         }, 500);
     }
     
-    Navigation.init();
+    Navigation.init(); // Aqui ele vai desenhar o menu com as categorias novas
     Products.init();
     UI.updateCartUI();
     
